@@ -1,4 +1,6 @@
+# %%
 ###########################
+# template provided by: https://learning.edx.org/course/course-v1:MITx+6.00.2x+1T2021/
 # 6.00.2x Problem Set 1: Space Cows 
 
 from ps1_partition import get_partitions
@@ -10,6 +12,8 @@ import time
 
 def load_cows(filename):
     """
+    Helper code -> edx.org
+
     Read the contents of the given file.  Assumes the file contents contain
     data in the form of comma-separated cow name, weight pairs, and return a
     dictionary containing cow names as keys and corresponding weights as values.
@@ -29,6 +33,22 @@ def load_cows(filename):
         line_data = line.split(',')
         cow_dict[line_data[0]] = int(line_data[1])
     return cow_dict
+
+def make_data_stucture(hash_table):
+    """
+    Parameters:
+    hash_table - dictionary with string key and integer value items
+    
+    Returns:
+    dictionary with integer key and list value items
+    """
+    result = {}
+    for h in hash_table.keys():
+        value = hash_table[h]
+        if value not in result:
+            result[value] = []
+        result[value].append(h)
+    return result
 
 
 # Problem 1
@@ -54,9 +74,30 @@ def greedy_cow_transport(cows,limit=10):
     transported on a particular trip and the overall list containing all the
     trips
     """
-    # TODO: Your code here
-    pass
-
+    cows_new = make_data_stucture(cows)
+    result = []
+    while any(cows_new[k] for k in cows_new.keys()):
+        i = 0
+        remaining = limit
+        current_result = []
+        remaining_vals = [k for k in cows_new.keys() if cows_new[k]]
+        remaining_vals.sort(reverse=True)
+        while True:
+            if i > len(remaining_vals) - 1:
+                result.append(current_result)
+                break
+            val = remaining_vals[i]
+            if val < remaining:
+                if cows_new[val]:
+                    current_result.append(cows_new[val][0])
+                    cows_new[val].pop(0)
+                    remaining -= val
+                else:
+                    i += 1
+            else:
+                i += 1
+    return result
+        
 
 # Problem 2
 def brute_force_cow_transport(cows,limit=10):
@@ -79,8 +120,17 @@ def brute_force_cow_transport(cows,limit=10):
     transported on a particular trip and the overall list containing all the
     trips
     """
-    # TODO: Your code here
-    pass
+    cow_names = [v for v in cows.keys()]
+    cows_set = get_partitions(cow_names)
+    for attempt in cows_set:
+        i = 0
+        for a in attempt:
+            weights = [cows[cow] for cow in a]
+            if sum(weights) > limit:
+                break
+            i += 1
+        if i == len(attempt):
+            return attempt
 
         
 # Problem 3
@@ -107,11 +157,12 @@ Do not submit this along with any of your answers. Uncomment the last two
 lines to print the result of your problem.
 """
 
-cows = load_cows("ps1_cow_data.txt")
-limit=100
-print(cows)
+if __name__ == '__main__':
 
-print(greedy_cow_transport(cows, limit))
-print(brute_force_cow_transport(cows, limit))
+    cows = load_cows("ps1_cow_data.txt")
+    # limit=100
+    # print(cows)
+    # print(greedy_cow_transport(cows, limit))
+    print(brute_force_cow_transport(cows))
 
-
+# %%
